@@ -2029,13 +2029,22 @@ def getsrclib(spec, srclib_dir, basepath=False,
     sdir = os.path.join(srclib_dir, name)
 
     if not preponly:
-        vcs = getvcs(srclib["RepoType"], srclib["Repo"], sdir)
-        vcs.srclib = (name, number, sdir)
-        if ref:
-            vcs.gotorevision(ref, refresh)
+        if name == "MozFennec":
+            rev = ".".join(ref.split("_")[1:4])
+            url = f"https://ftp.mozilla.org/pub/firefox/releases/{rev}/source/firefox-{rev}.source.tar.xz"
+            os.makedirs(sdir, 0o755, True)
+            p = FDroidPopen(['bash', '-e', '-u', '-o', 'pipefail', '-x', '-c', '--',
+                            f'curl -s {url} -o - | bsdtar -x -f - --strip-components=1 -C {sdir}'])
+            if p.returncode != 0:
+                raise BuildException("Error running fetch command for MozFennec")
+        else:
+            vcs = getvcs(srclib["RepoType"], srclib["Repo"], sdir)
+            vcs.srclib = (name, number, sdir)
+            if ref:
+                vcs.gotorevision(ref, refresh)
 
-        if raw:
-            return vcs
+            if raw:
+                return vcs
 
     libdir = None
     if subdir:
