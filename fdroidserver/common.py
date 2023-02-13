@@ -1178,7 +1178,7 @@ class vcs_git(vcs):
     def gotorevisionx(self, rev):
         if not os.path.exists(self.local):
             # Brand new checkout
-            p = self.git(['clone', '--', self.remote, str(self.local)])
+            p = self.git(['clone', '--filter=tree:0', '--', self.remote, str(self.local)])
             if p.returncode != 0:
                 self.clone_failed = True
                 raise VCSException("Git clone failed", p.output)
